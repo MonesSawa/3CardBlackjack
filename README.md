@@ -1,4 +1,5 @@
 3 Card Blackjack!
+
 A very teeny tiny micro project built by Mones Sawaftah, mainly to pass the time and keep some foundational skills fresh.
 
 Rules are simple:
