@@ -1,0 +1,257 @@
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        .column{
+            padding: 0;
+            width: auto;
+        }
+        .row{
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        #hit, #stand,#play{
+            margin-top: 10px;
+            display: inline-block;
+            height: 30px;
+            width: 200px;
+        }
+        .rules{
+            width: 820px;
+            height: 280px;
+            padding: 10px;
+            border: 5px solid gray;
+            margin: 10;
+        }
+        h1 {
+            font-weight: bold;
+            text-align: center;
+            font-size: 25px;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            font-size: 20px;
+        }
+        h3 {
+            font-weight: bold;
+            text-align: center;
+            font-size: 15px;
+        }
+
+    </style>
+    <title>3 Card Blackjack</title>
+    </head>
+        <h1> Welcome to 3 Card Blackjack!</h1>
+
+    <!-- Draw random card function -->
+    <script>
+        const suits = ["hearts", "diamonds", "clubs", "spades"];
+        const ranks = [
+            { name: "2", value: 2 }, { name: "3", value: 3 }, { name: "4", value: 4 },
+            { name: "5", value: 5 }, { name: "6", value: 6 }, { name: "7", value: 7 },
+            { name: "8", value: 8 }, { name: "9", value: 9 }, { name: "10", value: 10 },
+            { name: "jack", value: 10 }, { name: "queen", value: 10 }, { name: "king", value: 10 },
+            { name: "ace", value: 11 }
+        ];
+
+    //randomize card draw    
+        function getRandomCard(){
+            const suit = suits[Math.floor(Math.random() * suits.length)];
+            const rank = ranks[Math.floor(Math.random() * ranks.length)];
+            const imagePath = `deck/${rank.name}_of_${suit}.png`; 
+            const value = rank.value;
+
+            return {'imagePath':imagePath, 'value': value };
+        }
+    //manage buttons, deal initial cards
+    let PlayerValue = 0; 
+    let DealerValue = 0; 
+        function startGame(){
+            document.getElementById("play").onclick = document.getElementById("play").disabled = true;
+            document.getElementById("hit").disabled = false;
+            document.getElementById("stand").disabled = false;
+
+            const FirstDealerCard = getRandomCard();
+            document.getElementById("FirstDealerCard").src = FirstDealerCard.imagePath;
+            
+            const FirstPlayerCard = getRandomCard();
+            document.getElementById("FirstPlayerCard").src = FirstPlayerCard.imagePath;
+
+            
+            const SecondPlayerCard = getRandomCard();
+            document.getElementById("SecondPlayerCard").src = SecondPlayerCard.imagePath;
+
+            DealerValue = FirstDealerCard.value;
+            PlayerValue = FirstPlayerCard.value + SecondPlayerCard.value;
+
+            document.getElementById("PlayerTotal").textContent = PlayerValue;
+            document.getElementById("DealerTotal").textContent = DealerValue;
+        }
+    //draw the third player card "hit"
+        function drawCardPlayer() {
+            document.getElementById("stand").disabled = true;
+            const ThirdPlayerCard = getRandomCard();
+            document.getElementById("ThirdPlayerCard").src = ThirdPlayerCard.imagePath;
+
+            document.getElementById("hit").onclick = document.getElementById("hit").disabled = true;
+
+            setTimeout(drawCardDealer,1500);
+
+            PlayerValue += ThirdPlayerCard.value;
+            document.getElementById("PlayerTotal").textContent = PlayerValue;
+        }
+        
+        function drawCardDealer(){
+            document.getElementById("hit").disabled = true;
+            document.getElementById("stand").disabled = true;
+
+            const SecondDealerCard = getRandomCard();
+            const ThirdDealerCard = getRandomCard();
+
+            document.getElementById("SecondDealerCard").src = SecondDealerCard.imagePath;
+            DealerValue += SecondDealerCard.value
+            document.getElementById("DealerTotal").textContent = DealerValue;
+
+            //player bust condition
+            if (PlayerValue > 21){
+                document.getElementById("PlayerStatus").textContent = "BUST!";
+                dealerWin();
+                return;
+            }
+            
+            //draw dealer 3rd card
+            if (DealerValue < 15){
+                //delay 3rd draw
+                setTimeout(() => {
+                    document.getElementById("ThirdDealerCard").src = ThirdDealerCard.imagePath;
+                    DealerValue += ThirdDealerCard.value;
+                    document.getElementById("DealerTotal").textContent = DealerValue;
+
+                if (DealerValue > 21){
+                    playerWin();
+                    document.getElementById("DealerStatus").textContent = "BUST!";
+                }else if (DealerValue > PlayerValue){
+                    dealerWin();
+                }else if (PlayerValue > DealerValue){
+                    playerWin();
+                }else{
+                    drawGame();
+                }
+            }, 1000);
+        } else {
+            // If no draw, check immediately
+            if (DealerValue > 21) {
+                document.getElementById("DealerStatus").textContent = "BUST!";
+                playerWin();
+            } else if (DealerValue > PlayerValue) {
+                dealerWin();
+            } else if (PlayerValue > DealerValue) {
+                playerWin();
+            } else {
+                drawGame();
+            }
+        }
+    }
+    function dealerWin(){
+        document.getElementById("thedealer").src = "iwin.jpg";
+        document.getElementById("DealerStatus").textContent = "The House ALWAYS wins heh.";
+        document.getElementById("PlayerStatus").textContent = "you lose..";
+    }
+    function playerWin(){
+        document.getElementById("thedealer").src = "youwin.jpg";
+        document.getElementById("PlayerStatus").textContent = "YOU WIN!";
+        document.getElementById("DealerStatus").textContent = "NOOOOO!";
+    }
+    function drawGame(){
+        document.getElementById("thedealer").src = "wedraw.jpg";
+        document.getElementById("PlayerStatus").textContent = "DRAW";
+        document.getElementById("DealerStatus").textContent = "Don't be shy let's play again";
+    }
+
+    </script>
+
+    <!-- poker table style coloring -->
+    <body style="background-color: #35654d;">
+    <center> <img id="thedealer" src="thedealer.jpg" width="250" height="200" alt="the dealer stands here"> </center>
+
+    <!-- Dealer's Cards -->
+    <h2> Dealer's Hand </h2>
+    <h3 id="DealerTotal"> Value: </h2>
+    <h3 id="DealerStatus"></h2>
+    
+    <div class="row">
+        <div class = "column">
+            <div id="dealer-card-container">
+                <img id="FirstDealerCard" src="deck/red_joker.png" alt="Dealer's Card" width="100">
+            </div>
+        </div>
+        <div class = "column">
+            <div id="dealer-card-container">
+                <img id="SecondDealerCard" src="deck/red_joker.png" alt="Dealer's Card" width="100">
+            </div>
+        </div>
+        <div class = "column">
+            <div id="dealer-card-container">
+                <img id="ThirdDealerCard" src="deck/red_joker.png" alt="Dealer's Card" width="100">
+            </div>
+        </div>
+    </div>
+    </center>
+
+    <!-- Player's Cards -->
+    <h2> Player's Hand </h2>
+    <h3 id="PlayerTotal"> Value: </h2>
+    <h3 id="PlayerStatus"></h2>
+
+    <div class="row">
+        <div class = "column">
+            <div id="player-card-container">
+                <img id="FirstPlayerCard" src="deck/black_joker.png" alt="Player's Card" width="100">
+            </div>
+        </div>
+        <div class = "column">
+            <div id="player-card-container">
+                <img id="SecondPlayerCard" src="deck/black_joker.png" alt="Player's Card" width="100">
+            </div>
+        </div>
+        <div class = "column">
+            <div id="player-card-container">
+                <img id="ThirdPlayerCard" src="deck/black_joker.png" alt="Player's Card" width="100">
+            </div>
+        </div>
+    </div>
+            <center><button id="play" onclick="startGame()"> PLAY </button></center>
+            <center><button id="hit" onclick="drawCardPlayer()" disabled> HIT ME! </button></center>
+            <center><button id="stand" onclick="drawCardDealer()" disabled> STAND! </button></center>
+    </body>
+
+    <!-- Rules of the game and how to play -->
+    <center> <div class="rules"><b>Rules:</b><br>
+        The dealer draws 1 random card from the deck for himself <br>
+        and one random card for you, the player.<br>
+
+        <br> Then the player gets a choice to draw another card or to "stand!" and draw no card<br>
+        when the player clicks on "hit me!" they will recieve a random card,<br>
+        
+        <br> if the total value of both cards add up to 21 <b>AND</b> the dealer's card do <b>NOT</b> add up to 21 the player wins<br>
+        
+        <br> if the dealer's cards add up to 21 as well, the match ends in a draw<br>
+        
+        <br> if the dealer's cards amount to less than the player's card they lose <br>
+        the first to go above 21 after drawing loses immediately.
+    </div> </center>
+    
+    <!-- credits and contact details -->
+    <p> This project was developed by Mones Sawaftah to demonstrate wit,<br>
+        interest in game development and a small hint of JS, HTMl & CSS knowledge! <br></p>
+        
+        <a href="mailto:mo.sawaftah96@gmail.com"> Contact me on my email here!</a>
+
+
+</html>
